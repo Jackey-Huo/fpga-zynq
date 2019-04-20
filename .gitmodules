@@ -21,3 +21,6 @@
 [submodule "testchipip"]
 	path = testchipip
 	url = https://github.com/ucb-bar/testchipip.git
+[submodule "ax7021/fpga-images-ax7021"]
+	path = ax7021/fpga-images-ax7021
+	url = https://github.com/jiegec/fpga-images-ax7021.git
