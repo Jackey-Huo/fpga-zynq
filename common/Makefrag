@@ -210,28 +210,46 @@ fesvr-srcs = \
 	$(common)/csrc/zynq_driver.cc \
 	$(testchipip)/csrc/blkdev.cc \
 
+fesvr-code-srcs = \
+	$(ROCKET_DIR)/riscv-tools/riscv-fesvr/
+
 fesvr-hdrs = \
 	$(common)/csrc/zynq_driver.h \
 	$(testchipip)/csrc/blkdev.h \
 
-fesvr-lib = $(common_build)/libfesvr.so
+fesvr-obj = \
+	$(common_build)/context.o \
+	$(common_build)/device.o \
+	$(common_build)/dtm.o \
+	$(common_build)/dummy.o \
+	$(common_build)/elfloader.o \
+	$(common_build)/htif_hexwriter.o \
+	$(common_build)/htif.o \
+	$(common_build)/htif_pthread.o \
+	$(common_build)/memif.o \
+	$(common_build)/option_parser.o \
+	$(common_build)/rfb.o \
+	$(common_build)/syscall.o \
+	$(common_build)/term.o \
+	$(common_build)/tsi.o \
 
 CXX_FPGA      = arm-linux-gnueabihf-g++
-CXXFLAGS_FPGA = -O2 -std=c++11 -Wall -L$(common_build) -lfesvr \
-                -Wl,-rpath,/usr/local/lib \
+
+CXXFLAGS_FPGA = -O2 -std=c++11 -static -Wall -L$(common_build) -pthread \
+				-Wl,-rpath,/usr/local/lib \
 		-I $(common)/csrc -I $(testchipip)/csrc \
 		-I $(ROCKET_DIR)/riscv-tools/riscv-fesvr/ \
 		-Wl,-rpath,/usr/local/lib \
 
-$(fesvr-lib):
+$(fesvr-obj):
 	mkdir -p $(common_build)
 	cd $(common_build) && \
 	$(ROCKET_DIR)/riscv-tools/riscv-fesvr/configure \
 		--host=arm-linux-gnueabihf && \
 	make libfesvr.so
 
-$(common_build)/$(fesvr-main): $(fesvr-lib) $(fesvr-srcs) $(fesvr-hdrs)
-	$(CXX_FPGA) $(CXXFLAGS_FPGA) -o $(common_build)/$(fesvr-main) $(fesvr-srcs)
+$(common_build)/$(fesvr-main): $(fesvr-obj) $(fesvr-srcs) $(fesvr-hdrs)
+	$(CXX_FPGA) $(CXXFLAGS_FPGA) -o $(common_build)/$(fesvr-main) $(fesvr-srcs) $(fesvr-obj)
 
 fesvr-zynq: $(common_build)/$(fesvr-main)
 
